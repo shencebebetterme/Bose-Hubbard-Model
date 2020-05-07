@@ -13,5 +13,8 @@ int main() {
 	std::cout << "\nPlease enter the number of total particles N:" << std::endl;
 	std::cin >> numParticles;
 	*/
-
+	BHModel bh(5, 3);
+	bh.generateHDF5DataFile();
+	arma::umat data = bh.readData();
+	data.print("data:");
 }
