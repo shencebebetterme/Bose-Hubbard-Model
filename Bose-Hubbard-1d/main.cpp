@@ -13,51 +13,10 @@ int numParticles = 1;
 
 double intStrength; //the interaction strength U (with J set to 1).{
 
-void argParser(int argc, char* argv[]) {
-	enum argStr
-	{
-		h,
-		num_Sites,
-		num_Particles,
-		inter_Strength
-	};
-
-	std::map<std::string, argStr> argMap;
-	//initialize the map
-	//argMap["-h"] = h;
-	argMap["-numSites"] = num_Sites;
-	argMap["-nS"] = num_Sites;
-	argMap["-numParticles"] = num_Particles;
-	argMap["-nP"] = num_Particles;
-
-	// the first arg is the funcion name
-	// start from the second arg
-	for (int i = 1; i < argc; i++) {
-		std::string arg_i(argv[i]);
-		// other command arguments have structure arg=val
-		int equalSign = arg_i.find("=");
-		// obtain the arg-val pair
-		std::string arg_ic = arg_i.substr(0, equalSign);//arg_i content
-		std::string arg_iv = arg_i.substr(equalSign + 1, -1);//arg_i value
-		switch (argMap[arg_ic])
-		{
-		case num_Sites : numSites = std::stoi(arg_iv);
-		case num_Particles: numParticles = std::stoi(arg_iv);
-		default:
-			break;
-		}
-	}
-}
+void argParser(int argc, char* argv[]);
 
 int main(int argc, char* argv[]) {
 	if (argc > 1) {
-		if (std::string(argv[1]) == "-h") {
-			std::cout << "pass command line arguments\n"
-				<< "-nS\tnumber of Sites, default = 1\n"
-				<< "-nP\tnumber of Particles, default = 1"
-				<< std::endl;
-			return 0;
-		}
 		argParser(argc, argv);
 	}
 	std::cout << "number of sites is " << numSites << "\n";
@@ -68,6 +27,8 @@ int main(int argc, char* argv[]) {
 	std::cout << "\nPlease enter the number of total particles N:" << std::endl;
 	std::cin >> numParticles;
 	*/
+
+
 	BHModel bh(numSites, numParticles);
 	bh.generateHDF5DataFile();
 	bh.readh5dims();
@@ -81,4 +42,47 @@ int main(int argc, char* argv[]) {
 	//because h5 is column based, we need to take the transpose
 	data = data.t();//now data is a nBasis*basisLen matrix
 	data.print("data matrix is:");
+
+}
+
+
+void argParser(int argc, char* argv[]) {
+	//help
+	if (std::string(argv[1]) == "-h") {
+		std::cout << "pass command line arguments\n"
+			<< "-nS\tnumber of Sites, default = 1\n"
+			<< "-nP\tnumber of Particles, default = 1"
+			<< std::endl;
+		std::exit(EXIT_FAILURE);
+	}
+
+	enum argStr
+	{
+		h,
+		num_Sites,
+		num_Particles,
+		inter_Strength
+	};
+
+	std::map<std::string, argStr> argMap;
+	//initialize the map
+	//argMap["-h"] = h;
+	argMap["-nS"] = num_Sites;
+	argMap["-nP"] = num_Particles;
+
+	// the first arg is the funcion name
+	// start from the second arg
+	for (int i = 1; i < argc; i++) {
+		std::string arg_i(argv[i]);
+		// other command arguments have structure arg=val
+		int equalSign = arg_i.find("=");
+		// obtain the arg-val pair
+		std::string arg_ic = arg_i.substr(0, equalSign);//arg_i content
+		std::string arg_iv = arg_i.substr(equalSign + 1, -1);//arg_i value
+		switch (argMap[arg_ic])
+		{
+		case num_Sites: numSites = std::stoi(arg_iv); break;
+		case num_Particles: numParticles = std::stoi(arg_iv); break;
+		}
+	}
 }
