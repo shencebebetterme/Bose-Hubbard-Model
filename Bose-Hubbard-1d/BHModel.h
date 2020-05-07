@@ -9,13 +9,15 @@ public:
 	int basisLen = 1; // dim1 in .h5
 	std::string wl_file_name = "test.wl";
 	std::string h5_file_name = "data.h5";
+	std::string dim_file_name = "dims.txt";
 
+	//constructor of BHModel class
 	BHModel(int n_particles = 5, int n_sites = 3) {
 		nSites = n_sites;
 		nParticles = n_particles;
 	}
 
-	void generateHDF5DataFile() {
+	void generateWlFile() {
 		//wolframscript -code 'Export[\"data.h5\",Flatten[Permutations/@(PadRight[#,3]&/@IntegerPartitions[5,3]),1]]'
 		/*
 		std::string cmd1 = "wolframscript -code 'Export[\"data.h5\",Flatten[Permutations/@(PadRight[#,";
@@ -28,23 +30,39 @@ public:
 		//create .wl file
 		std::string line1 = "nS=" + std::to_string(nSites) + ";\n";
 		std::string line2 = "nP=" + std::to_string(nParticles) + ";\n";
-		std::string line3 = "Export[\"" + h5_file_name + "\",Flatten[Permutations/@(PadRight[#,nS]&/@IntegerPartitions[nP,nS]),1]]";
+		std::string line3 = "data=Flatten[Permutations/@(PadRight[#,nS]&/@IntegerPartitions[nP,nS]),1];\n";
+		std::string line4 = "Export[\"" + h5_file_name + "\",data];\n";
+		std::string line5 = "Print/@Dimensions[data];";
 		//std::string cmd1 = "Export[\"data.h5\",Flatten[Permutations/@(PadRight[#,";
 		//std::string cmd2 = "]&/@IntegerPartitions[";
 		//std::string cmd3 = "]),1]]";
 		//std::string cmd_nSites = std::to_string(nSites);
 		//std::string cmd_nParticles = std::to_string(nParticles);
 		//std::string cmd = cmd1 + cmd_nSites + cmd2 + cmd_nParticles + "," + cmd_nSites + cmd3;
-		std::string wl_contents = line1 + line2 + line3;
+		std::string wl_contents = line1 + line2 + line3 + line4 + line5;
 		std::ofstream wlfile(wl_file_name, std::ios::out);
 		wlfile << wl_contents;
 		wlfile.close();
+	}
+
+	//call wolframscript in shell
+	void generateHDF5DataFile() {
+		generateWlFile();
 		//run .wl file
-		std::string cmd = "wolframscript -file " + wl_file_name;
+		std::string cmd = "wolframscript -file " + wl_file_name + " > " + dim_file_name;
 		std::system(cmd.c_str());
 	}
 
-	arma::umat readData() {
+	//store the h5 matrix dimensions to nBasis and basisLen
+	void readh5dims() {
+		std::ifstream dimfile(dim_file_name, std::ios::app);
+		std::string line;//store temp dim
+		std::getline(dimfile, line); nBasis = stoi(line);
+		std::getline(dimfile, line); basisLen = stoi(line);
+	}
+
+#if 0
+arma::Mat<int> readData() {
 		auto file = H5Fopen(h5_file_name.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
 		auto dset = H5Dopen2(file, "Dataset1", H5P_DEFAULT);
 		//read the dimensions
@@ -55,11 +73,12 @@ public:
 		basisLen = dims[1];
 		//move .h5 data to armadillo int matrix
 		//arma::umat basisData(nBasis, basisLen);
-		arma::u64* read_buffer = new arma::u64[nBasis*basisLen];
+		//arma::u64* read_buffer = new arma::u64[nBasis*basisLen];
+		int* read_buffer = new int[nBasis*basisLen];
 		auto status = H5Dread(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, read_buffer); //1D vector
 		status = H5Dclose(dset);
 		status = H5Fclose(file);
-		arma::umat basisData(read_buffer, nBasis, basisLen, false);
+		arma::Mat<int> basisData(read_buffer, nBasis, basisLen, false);
 		delete[] read_buffer;
 		
 		return basisData;
@@ -67,5 +86,8 @@ public:
 	// 1. read hdf5 data
 	// 2. create armadillo uword matrix from the data
 	// 3. all later manipulation devolved to armadillo
+#endif
+
+
 };
 
