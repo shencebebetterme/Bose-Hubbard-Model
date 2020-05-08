@@ -12,7 +12,7 @@ public:
 	std::string dim_file_name = "dims.txt";
 
 	//constructor of BHModel class
-	BHModel(int n_particles = 5, int n_sites = 3) {
+	BHModel(int n_sites = 1, int n_particles = 1) {
 		nSites = n_sites;
 		nParticles = n_particles;
 	}
