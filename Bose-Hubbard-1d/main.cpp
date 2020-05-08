@@ -10,17 +10,15 @@ link with the hdf5 library:
 
 int numSites = 1;
 int numParticles = 1;
-
 double intStrength; //the interaction strength U (with J set to 1).{
 
 void argParser(int argc, char* argv[]);
 
 int main(int argc, char* argv[]) {
-	if (argc > 1) {
-		argParser(argc, argv);
-	}
-	std::cout << "number of sites is " << numSites << "\n";
-	std::cout << "number of Particles is " << numParticles << "\n";
+	
+	argParser(argc, argv);
+	std::cout << "number of sites = " << numSites << "\n";
+	std::cout << "number of Particles = " << numParticles << "\n";
 	/*
 	std::cout << "1d Bose-Hubbard model.\n\nPlease input the number of sites M:" << std::endl;
 	std::cin >> numSites;
@@ -47,18 +45,22 @@ int main(int argc, char* argv[]) {
 
 
 void argParser(int argc, char* argv[]) {
+	//no arguments, use the default value
+	if (argc == 1) {
+		return;
+	}
+
 	//help
 	if (std::string(argv[1]) == "-h") {
 		std::cout << "pass command line arguments\n"
-			<< "-nS\tnumber of Sites, default = 1\n"
-			<< "-nP\tnumber of Particles, default = 1"
+			<< "-nS\tnumber of Sites, default value = 1\n"
+			<< "-nP\tnumber of Particles, default value = 1"
 			<< std::endl;
 		std::exit(EXIT_FAILURE);
 	}
 
 	enum argStr
 	{
-		h,
 		num_Sites,
 		num_Particles,
 		inter_Strength
@@ -66,7 +68,6 @@ void argParser(int argc, char* argv[]) {
 
 	std::map<std::string, argStr> argMap;
 	//initialize the map
-	//argMap["-h"] = h;
 	argMap["-nS"] = num_Sites;
 	argMap["-nP"] = num_Particles;
 

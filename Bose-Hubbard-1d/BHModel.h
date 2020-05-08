@@ -7,7 +7,7 @@ public:
 	int nParticles;
 	int nBasis = 1; // dim0 in .h5
 	int basisLen = 1; // dim1 in .h5
-	std::string wl_file_name = "test.wl";
+	std::string wl_file_name = "generateBasis.wl";
 	std::string h5_file_name = "data.h5";
 	std::string dim_file_name = "dims.txt";
 
@@ -17,6 +17,8 @@ public:
 		nParticles = n_particles;
 	}
 
+#if 0
+	//deprecated
 	void generateWlFile() {
 		//wolframscript -code 'Export[\"data.h5\",Flatten[Permutations/@(PadRight[#,3]&/@IntegerPartitions[5,3]),1]]'
 		/*
@@ -44,12 +46,14 @@ public:
 		wlfile << wl_contents;
 		wlfile.close();
 	}
+#endif
 
 	//call wolframscript in shell
 	void generateHDF5DataFile() {
-		generateWlFile();
 		//run .wl file
-		std::string cmd = "wolframscript -file " + wl_file_name + " > " + dim_file_name;
+		std::string cmd_nSites = " " + std::to_string(nSites);
+		std::string cmd_nParticles = " " + std::to_string(nParticles);
+		std::string cmd = "wolframscript -file " + wl_file_name + cmd_nSites + cmd_nParticles + " > " + dim_file_name;
 		std::system(cmd.c_str());
 	}
 
