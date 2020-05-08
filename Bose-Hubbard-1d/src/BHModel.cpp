@@ -1,9 +1,6 @@
 #include "pch.h"
 #include "BHModel.h"
 
-
-
-
 void BHModel::printBasis() {
 	currentVec = firstVec;
 	while (1) {
@@ -14,15 +11,13 @@ void BHModel::printBasis() {
 	}
 }
 
-
-
 int BHModel::getK(const basisVecType& vec) const {
 	int last = vec.n_elem - 1;
 	if (vec.n_elem == 1) return 1;
 	for (int i = last - 1; i >= 0; ) {
 		if (vec(i) == 0) i--;
 		else {
-			//std::cout << "k=" << i << "\n"; 
+			//std::cout << "k=" << i << "\n";
 			return i;
 		}
 	}
@@ -37,8 +32,6 @@ basisVecType BHModel::nextVec(const basisVecType& vec) const {
 	if (last > (k + 1)) { res(last) = 0; }
 	return res;
 }
-
-
 
 // get the total number of basis, save the value to nBasis
 // store the basis vectors into a std::vector

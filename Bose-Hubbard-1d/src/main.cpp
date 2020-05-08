@@ -15,7 +15,6 @@ int numSites = 1;
 int numParticles = 1;
 double intStrength; //the interaction strength U (with J set to 1)
 
-
 void argParser(int argc, char* argv[]);
 void getModel(int ns, int np);
 
@@ -26,7 +25,9 @@ int main(int argc, char* argv[]) {
 
 #if 1
 	getModel(numSites, numParticles);
-	
+
+	//TODO: write the Hamiltonian matrix
+
 	//arma::Mat<int> data;
 	//data.load(arma::hdf5_name(h5_file_name, "Dataset1"));
 	////because h5 is column based, we need to take the transpose
@@ -48,7 +49,7 @@ void inline getModel(int ns, int np) {
 	bh.mkBasisMatrix();
 	auto stop = high_resolution_clock::now();
 	auto duration = duration_cast<milliseconds>(stop - start);
-	std::cout << duration.count()/1000.0 << " seconds has elapsed" << std::endl;
+	std::cout << duration.count() / 1000.0 << " seconds has elapsed" << std::endl;
 	//bh.generateH5();
 	//bh.readh5dims();
 }
