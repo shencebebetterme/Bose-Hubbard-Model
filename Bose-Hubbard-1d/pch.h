@@ -7,5 +7,7 @@
 #include <map>
 #include <filesystem>
 #include <chrono>
+#include <vector>
+#include <cstdint>
 
 #include "armadillo"

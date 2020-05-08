@@ -9,6 +9,7 @@ link with the hdf5 library:
 #include "BHModel.h"
 
 using namespace std::chrono;
+namespace fs = std::filesystem;
 
 int numSites = 1;
 int numParticles = 1;
@@ -20,8 +21,8 @@ void getModel(int ns, int np);
 
 int main(int argc, char* argv[]) {
 	argParser(argc, argv);
-	std::cout << "number of Sites = " << numSites << "\n";
-	std::cout << "number of Particles = " << numParticles << "\n";
+	std::cout << "\nnumber of Sites = " << numSites << "\n";
+	std::cout << "number of Particles = " << numParticles << "\n\n";
 
 #if 1
 	getModel(numSites, numParticles);
@@ -47,7 +48,7 @@ void inline getModel(int ns, int np) {
 	bh.mkBasisMatrix();
 	auto stop = high_resolution_clock::now();
 	auto duration = duration_cast<seconds>(stop - start);
-	std::cout << duration.count() << " seconds taken" << std::endl;
+	std::cout << duration.count() << " seconds has elapsed" << std::endl;
 	//bh.generateH5();
 	//bh.readh5dims();
 }

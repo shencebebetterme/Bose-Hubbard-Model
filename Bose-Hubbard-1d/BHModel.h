@@ -5,7 +5,8 @@ const std::string wl_file_name = "generateBasis.wl";
 const std::string h5_file_name = "data.h5";
 const std::string dim_file_name = "dims.txt";
 
-using basisVecType = arma::Row<int>;
+using basisVecType = arma::Row<uint8_t>;
+namespace fs = std::filesystem;
 
 class BHModel {
 public:
@@ -78,6 +79,7 @@ public:
 	// use algorithm to generate all vectors
 	int getK(const basisVecType&) const;
 	basisVecType nextVec(const basisVecType&) const;
+	void createBasisMatrix();
 
 	void printBasis() {
 		currentVec = firstVec;
@@ -95,23 +97,11 @@ public:
 	}
 
 	void mkBasisMatrix() {
-		currentVec = firstVec;
-		int nrows = 1;
-		arma::Mat<int> basisMat(firstVec);
-		while (1) {
-			if (sum(currentVec != lastVec)) {
-				currentVec = nextVec(currentVec);
-				nrows++;
-				basisMat = arma::join_cols(basisMat, currentVec);
-			}
-			else {
-				basisMat.save(arma::hdf5_name(h5name(), "dataset"));
-				std::cout << "basis matrix has dimension " << nrows << " * " << nSites << "\n";
-				std::cout << "basis matrix is successfully created and saved to basis_matrix.h5\n";
-				break;
-			}
-		}
+		if (fs::exists(h5name())) { std::cout << "h5 file already exists.\n"; return; }
+		else createBasisMatrix();
 	}
+
+
 
 #if 0
 	//deprecated
@@ -163,4 +153,26 @@ basisVecType BHModel::nextVec(const basisVecType& vec) const {
 	res(k + 1) = vec(last) + 1;
 	if (last > (k + 1)) { res(last) = 0; }
 	return res;
+}
+
+void BHModel::createBasisMatrix() {
+	currentVec = firstVec;
+	int nrows = 1;
+	arma::Mat<uint8_t> basisMat(firstVec);
+	while (1) {
+		if (sum(currentVec != lastVec)) {
+			currentVec = nextVec(currentVec);
+			if (nrows % 1000 == 1) {
+				std::cout << nrows << "\tvectors generated!\n";	
+			}
+			basisMat.insert_rows(nrows, currentVec);
+			nrows++;
+		}
+		else {
+			basisMat.save(arma::hdf5_name(h5name(), "dataset"));
+			std::cout << "\nbasis matrix has dimension " << nrows << " * " << nSites << "\n";
+			std::cout << "basis matrix is successfully created and saved to basis_matrix.h5\n\n";
+			break;
+		}
+	}
 }
