@@ -58,7 +58,7 @@ public:
 	}
 #endif
 
-	//call wolframscript in shell
+	//deprecated, call wolframscript in shell
 	void MMA_GenerateH5() {
 		//run .wl file
 		std::string cmd_nSites = " " + std::to_string(nSites);
@@ -89,6 +89,11 @@ public:
 		}
 	}
 
+	const char* h5name() {
+		std::string str = "nS=" + std::to_string(nSites) + "_nP=" + std::to_string(nParticles) + "basis.h5";
+		return str.c_str();
+	}
+
 	void mkBasisMatrix() {
 		currentVec = firstVec;
 		int nrows = 1;
@@ -100,7 +105,7 @@ public:
 				basisMat = arma::join_cols(basisMat, currentVec);
 			}
 			else {
-				basisMat.save(arma::hdf5_name("basis_matrix.h5", "dataset"));
+				basisMat.save(arma::hdf5_name(h5name(), "dataset"));
 				std::cout << "basis matrix has dimension " << nrows << " * " << nSites << "\n";
 				std::cout << "basis matrix is successfully created and saved to basis_matrix.h5\n";
 				break;
