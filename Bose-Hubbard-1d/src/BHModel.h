@@ -41,7 +41,7 @@ public:
 	}
 
 	void mkBasisMatrix() {
-		if (fs::exists(h5name())) { std::cout << "h5 file already exists.\n"; return; }
+		if (fs::exists(h5name())) { std::cout << "h5 file already exists! Exiting.\n"; return; }
 		else {
 			getNBasis();
 			createBasisMatrix();
