@@ -5,7 +5,7 @@ const std::string wl_file_name = "generateBasis.wl";
 const std::string h5_file_name = "data.h5";
 const std::string dim_file_name = "dims.txt";
 
-using basisVecType = arma::Row<uint8_t>;
+using basisVecType = arma::Col<uint8_t>;
 namespace fs = std::filesystem;
 
 class BHModel {
@@ -17,6 +17,7 @@ public:
 	basisVecType firstVec;
 	basisVecType lastVec;
 	basisVecType currentVec;
+	std::vector<basisVecType> matVec = {};
 
 	//constructor of BHModel class
 	BHModel(int n_sites = 1, int n_particles = 1) {
@@ -58,7 +59,7 @@ public:
 		wlfile.close();
 	}
 #endif
-
+#if 0
 	//deprecated, call wolframscript in shell
 	void MMA_GenerateH5() {
 		//run .wl file
@@ -75,32 +76,28 @@ public:
 		std::getline(dimfile, line); nBasis = stoi(line);
 		std::getline(dimfile, line); nSites = stoi(line);
 	}
+#endif
 
 	// use algorithm to generate all vectors
 	int getK(const basisVecType&) const;
 	basisVecType nextVec(const basisVecType&) const;
 	void createBasisMatrix();
-
-	void printBasis() {
-		currentVec = firstVec;
-		while (1) {
-			currentVec.print();
-			if (sum(currentVec != lastVec)) 
-				currentVec = nextVec(currentVec);
-			else break;
-		}
-	}
+	void printBasis();
+	void getNBasis();
+	
 
 	const char* h5name() {
-		std::string str = "nS=" + std::to_string(nSites) + "_nP=" + std::to_string(nParticles) + "basis.h5";
+		std::string str = "nS=" + std::to_string(nSites) + "_nP=" + std::to_string(nParticles) + "_basis.h5";
 		return str.c_str();
 	}
 
 	void mkBasisMatrix() {
 		if (fs::exists(h5name())) { std::cout << "h5 file already exists.\n"; return; }
-		else createBasisMatrix();
+		else {
+			getNBasis();
+			createBasisMatrix();
+		}
 	}
-
 
 
 #if 0
@@ -133,9 +130,19 @@ public:
 };
 
 
+void BHModel::printBasis() {
+	currentVec = firstVec;
+	while (1) {
+		currentVec.print();
+		if (sum(currentVec != lastVec))
+			currentVec = nextVec(currentVec);
+		else break;
+	}
+}
+
 int BHModel::getK(const basisVecType& vec) const {
-	int last = vec.n_cols - 1;
-	if (vec.n_cols == 1) return 1;
+	int last = vec.n_elem - 1;
+	if (vec.n_elem == 1) return 1;
 	for (int i = last - 1; i >= 0; ) {
 		if (vec(i) == 0) i--;
 		else { 
@@ -146,7 +153,7 @@ int BHModel::getK(const basisVecType& vec) const {
 }
 
 basisVecType BHModel::nextVec(const basisVecType& vec) const {
-	int last = vec.n_cols - 1;
+	int last = vec.n_elem - 1;
 	basisVecType res = vec;
 	int k = getK(res);
 	res(k) -= 1;
@@ -155,24 +162,40 @@ basisVecType BHModel::nextVec(const basisVecType& vec) const {
 	return res;
 }
 
-void BHModel::createBasisMatrix() {
+// get the total number of basis, save the value to nBasis
+// store the basis vectors into a std::vector
+void BHModel::getNBasis() {
 	currentVec = firstVec;
+	matVec.push_back(currentVec);
 	int nrows = 1;
-	arma::Mat<uint8_t> basisMat(firstVec);
 	while (1) {
 		if (sum(currentVec != lastVec)) {
 			currentVec = nextVec(currentVec);
-			if (nrows % 1000 == 1) {
-				std::cout << nrows << "\tvectors generated!\n";	
+			//basisMat.insert_rows(nrows, currentVec);
+
+			matVec.push_back(currentVec);
+			//show progress
+			if (nrows % 10000 == 1) {
+				std::cout << nrows << "\tvectors generated!\n";
 			}
-			basisMat.insert_rows(nrows, currentVec);
 			nrows++;
 		}
 		else {
-			basisMat.save(arma::hdf5_name(h5name(), "dataset"));
-			std::cout << "\nbasis matrix has dimension " << nrows << " * " << nSites << "\n";
-			std::cout << "basis matrix is successfully created and saved to basis_matrix.h5\n\n";
+			nBasis = nrows;
+			std::cout << "\nin total " << nBasis << " basis vectors generated\n";
 			break;
 		}
 	}
+}
+
+void BHModel::createBasisMatrix() {
+	arma::Mat<uint8_t> basisMat(nBasis, nSites);
+	for (int i = 0; i < nBasis; i++) {
+		for (int j = 0; j < nSites; j++) {
+			basisMat[i, j] = matVec[i](j);
+		}
+	}
+	basisMat.save(arma::hdf5_name(h5name(), "dataset"));
+	std::cout << "\nbasis matrix has dimension " << nBasis << " * " << nSites << "\n";
+	std::cout << "basis matrix is successfully created and saved to " << h5name() << "\n\n";
 }

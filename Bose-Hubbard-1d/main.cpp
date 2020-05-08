@@ -47,8 +47,8 @@ void inline getModel(int ns, int np) {
 	auto start = high_resolution_clock::now();
 	bh.mkBasisMatrix();
 	auto stop = high_resolution_clock::now();
-	auto duration = duration_cast<seconds>(stop - start);
-	std::cout << duration.count() << " seconds has elapsed" << std::endl;
+	auto duration = duration_cast<milliseconds>(stop - start);
+	std::cout << duration.count()/1000.0 << " seconds has elapsed" << std::endl;
 	//bh.generateH5();
 	//bh.readh5dims();
 }
