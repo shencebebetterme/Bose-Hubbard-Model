@@ -12,9 +12,6 @@ static enum argStr
 
 using mapType = std::map<std::string, argStr>;
 
-
-
-
 void showHelp();
 void initMap(mapType&);
 void parseAllArgs(mapType&, int, char**);
@@ -29,20 +26,17 @@ void argParser(int argc, char* argv[]) {
 	if (std::string(argv[1]) == "-h") {
 		showHelp();
 	}
-	
-	 mapType argMap;
-	 initMap(argMap);
-	 parseAllArgs(argMap, argc, argv);
+
+	mapType argMap;
+	initMap(argMap);
+	parseAllArgs(argMap, argc, argv);
 }
-
-
 
 // initialize the map
 void initMap(mapType& map) {
 	map["-nS"] = num_Sites;
 	map["-nP"] = num_Particles;
 }
-
 
 // show help message
 void inline showHelp() {
@@ -52,7 +46,6 @@ void inline showHelp() {
 		<< std::endl;
 	std::exit(EXIT_FAILURE);
 }
-
 
 // pass all arguments (starting from the second arg)
 void inline parseAllArgs(mapType& map, int argc, char* argv[]) {

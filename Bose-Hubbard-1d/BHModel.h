@@ -1,15 +1,16 @@
 #pragma once
 #include "pch.h"
 
+const std::string wl_file_name = "generateBasis.wl";
+const std::string h5_file_name = "data.h5";
+const std::string dim_file_name = "dims.txt";
+
 class BHModel {
 public:
 	int nSites;
 	int nParticles;
 	int nBasis = 1; // dim0 in .h5
 	int basisLen = 1; // dim1 in .h5
-	std::string wl_file_name = "generateBasis.wl";
-	std::string h5_file_name = "data.h5";
-	std::string dim_file_name = "dims.txt";
 
 	//constructor of BHModel class
 	BHModel(int n_sites = 1, int n_particles = 1) {
@@ -66,7 +67,7 @@ public:
 	}
 
 #if 0
-arma::Mat<int> readData() {
+	arma::Mat<int> readData() {
 		auto file = H5Fopen(h5_file_name.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
 		auto dset = H5Dopen2(file, "Dataset1", H5P_DEFAULT);
 		//read the dimensions
@@ -78,20 +79,17 @@ arma::Mat<int> readData() {
 		//move .h5 data to armadillo int matrix
 		//arma::umat basisData(nBasis, basisLen);
 		//arma::u64* read_buffer = new arma::u64[nBasis*basisLen];
-		int* read_buffer = new int[nBasis*basisLen];
+		int* read_buffer = new int[nBasis * basisLen];
 		auto status = H5Dread(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, read_buffer); //1D vector
 		status = H5Dclose(dset);
 		status = H5Fclose(file);
 		arma::Mat<int> basisData(read_buffer, nBasis, basisLen, false);
 		delete[] read_buffer;
-		
+
 		return basisData;
 	}
 	// 1. read hdf5 data
 	// 2. create armadillo uword matrix from the data
 	// 3. all later manipulation devolved to armadillo
 #endif
-
-
 };
-
