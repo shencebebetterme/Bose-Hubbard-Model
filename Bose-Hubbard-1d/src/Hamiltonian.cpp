@@ -23,7 +23,7 @@ Hamiltonian::Hamiltonian() {
 void Hamiltonian::loadBasisMat() {
 	if (fs::exists(basis_h5_file_name)) {
 		basisMat.load(arma::hdf5_name(basis_h5_file_name, dataset_name));
-		std::cout << basis_h5_file_name << " ==> " << dataset_name << "\thas been loaded!\n";
+		std::cout << basis_h5_file_name << " ==> " << dataset_name << "\thas been loaded!\n\n";
 	}
 	else {
 		std::cout << basis_h5_file_name << " doesn't exist!\n Exiting.\n\n";

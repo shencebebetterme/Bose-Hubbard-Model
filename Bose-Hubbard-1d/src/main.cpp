@@ -34,7 +34,8 @@ void getHamiltonian();
 int main(int argc, char* argv[]) {
 	argParser(argc, argv);
 	std::cout << "\nnumber of Sites = " << numSites << "\n";
-	std::cout << "number of Particles = " << numParticles << "\n\n";
+	std::cout << "number of Particles = " << numParticles << "\n";
+	std::cout << "interaction strength U/2J = " << intStrength << "\n\n";
 
 #if 1
 	getModel(numSites, numParticles);
@@ -78,7 +79,7 @@ void getHamiltonian() {
 	auto start = high_resolution_clock::now();
 	H.getH0();
 	H.getH1();
-	H.createHamiltonianMatrix();
+	H.mkHamiltonianMatrix();
 	auto stop = high_resolution_clock::now();
 	auto duration = duration_cast<milliseconds>(stop - start);
 	std::cout << duration.count() / 1000.0 << " seconds has elapsed in generating Hamiltonian matrix\n\n" << std::endl;

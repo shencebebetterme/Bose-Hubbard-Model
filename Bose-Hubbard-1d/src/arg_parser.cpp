@@ -37,6 +37,7 @@ void argParser(int argc, char* argv[]) {
 void initMap(mapType& map) {
 	map["-nS"] = num_Sites;
 	map["-nP"] = num_Particles;
+	map["-i"] = inter_Strength;
 }
 
 // show help message
@@ -62,6 +63,7 @@ void inline parseAllArgs(mapType& map, int argc, char* argv[]) {
 		{
 		case num_Sites: numSites = std::stoi(arg_iv); break;
 		case num_Particles: numParticles = std::stoi(arg_iv); break;
+		case inter_Strength: intStrength = std::stod(arg_iv); break;
 		}
 	}
 }
