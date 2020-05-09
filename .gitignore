@@ -6,6 +6,8 @@
 *.h5
 *.tlog
 bin-int/
+Release-x64/
+Bose-Hubbard-1d.tlog/
 
 # User-specific files
 *.rsuser
