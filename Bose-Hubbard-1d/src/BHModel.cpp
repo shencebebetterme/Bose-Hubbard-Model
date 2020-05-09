@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "BHModel.h"
 
+extern const char* dataset_name;
+
 void BHModel::printBasis() {
 	currentVec = firstVec;
 	while (1) {
@@ -43,30 +45,30 @@ void BHModel::getNBasis() {
 		if (sum(currentVec != lastVec)) {
 			currentVec = nextVec(currentVec);
 			//basisMat.insert_rows(nrows, currentVec);
-
 			matVec.push_back(currentVec);
 			//show progress
-			if (nrows % 10000 == 1) {
-				std::cout << nrows << "\tvectors generated!\n";
-			}
+			//if (nrows % 10000 == 1) {
+			//	std::cout << nrows << "\tvectors generated!\n";
+			//}
 			nrows++;
 		}
 		else {
 			nBasis = nrows;
-			std::cout << "\nin total " << nBasis << " basis vectors generated\n";
+			std::cout << "in total " << nBasis << " basis vectors generated\n";
 			break;
 		}
 	}
 }
 
 void BHModel::createBasisMatrix() {
-	arma::Mat<uint8_t> basisMat(nBasis, nSites);
+	basisMatType basisMat(nBasis, nSites);
 	for (int i = 0; i < nBasis; i++) {
 		for (int j = 0; j < nSites; j++) {
-			basisMat[i, j] = matVec[i](j);
+			basisMat(i, j) = matVec[i](j);
 		}
 	}
-	basisMat.save(arma::hdf5_name(h5name(), "dataset"));
+	//basisMat.print("basisMat is");
+	basisMat.save(arma::hdf5_name(h5name(), dataset_name));
 	std::cout << "\nbasis matrix has dimension " << nBasis << " * " << nSites << "\n";
 	std::cout << "basis matrix is successfully created and saved to " << h5name() << "\n\n";
 }

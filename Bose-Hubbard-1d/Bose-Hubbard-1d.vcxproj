@@ -175,6 +175,7 @@
   <ItemGroup>
     <ClCompile Include="src\arg_parser.cpp" />
     <ClCompile Include="src\BHModel.cpp" />
+    <ClCompile Include="src\Hamiltonian.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -189,6 +190,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\BHModel.h" />
+    <ClInclude Include="src\Hamiltonian.h" />
     <ClInclude Include="src\pch.h" />
   </ItemGroup>
   <ItemGroup>

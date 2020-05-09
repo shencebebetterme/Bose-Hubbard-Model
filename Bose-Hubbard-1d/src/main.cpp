@@ -7,16 +7,29 @@ link with the hdf5 library:
 */
 #include "pch.h"
 #include "BHModel.h"
+#include "Hamiltonian.h"
 
 using namespace std::chrono;
 namespace fs = std::filesystem;
 
 int numSites = 1;
 int numParticles = 1;
-double intStrength; //the interaction strength U (with J set to 1)
+int numBasis = 1;
+double intStrength = 1.0; //the interaction strength U/2 (with J set to 1)
+
+std::string basis_h5_file_name;
+std::string hamil_bin_file_name;
+const char* dataset_name = "dataset";
+
+
+/////////////////////////////////////////////////////////////////////////////////////////
+
+
 
 void argParser(int argc, char* argv[]);
 void getModel(int ns, int np);
+void getHamiltonian();
+
 
 int main(int argc, char* argv[]) {
 	argParser(argc, argv);
@@ -27,6 +40,8 @@ int main(int argc, char* argv[]) {
 	getModel(numSites, numParticles);
 
 	//TODO: write the Hamiltonian matrix
+	getHamiltonian();
+	
 
 	//arma::Mat<int> data;
 	//data.load(arma::hdf5_name(h5_file_name, "Dataset1"));
@@ -43,13 +58,30 @@ int main(int argc, char* argv[]) {
 #endif
 }
 
-void inline getModel(int ns, int np) {
-	BHModel bh(ns, np);
+
+//log the created h5 filename, update numBasis
+void getModel(int ns, int np) {
+	BHModel bh(numSites, numParticles);
+
 	auto start = high_resolution_clock::now();
 	bh.mkBasisMatrix();
 	auto stop = high_resolution_clock::now();
 	auto duration = duration_cast<milliseconds>(stop - start);
-	std::cout << duration.count() / 1000.0 << " seconds has elapsed" << std::endl;
-	//bh.generateH5();
-	//bh.readh5dims();
+	std::cout << duration.count() / 1000.0 << " seconds has elapsed in generating basis matrix\n\n" << std::endl;
+
+	basis_h5_file_name = bh.h5name();
+}
+
+void getHamiltonian() {
+	Hamiltonian H;
+
+	auto start = high_resolution_clock::now();
+	H.getH0();
+	H.getH1();
+	H.createHamiltonianMatrix();
+	auto stop = high_resolution_clock::now();
+	auto duration = duration_cast<milliseconds>(stop - start);
+	std::cout << duration.count() / 1000.0 << " seconds has elapsed in generating Hamiltonian matrix\n\n" << std::endl;
+
+	hamil_bin_file_name = H.bin_name();
 }

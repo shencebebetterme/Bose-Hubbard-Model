@@ -2,6 +2,7 @@
 
 extern int numSites;
 extern int numParticles;
+extern double intStrength; //the interaction strength U/2 (with J set to 1)
 
 static enum argStr
 {
@@ -40,9 +41,10 @@ void initMap(mapType& map) {
 
 // show help message
 void inline showHelp() {
-	std::cout << "pass command line arguments\n"
+	std::cout << "\npass command line arguments\n"
 		<< "-nS\tnumber of Sites, default value = 1\n"
-		<< "-nP\tnumber of Particles, default value = 1"
+		<< "-nP\tnumber of Particles, default value = 1\n"
+		<< "-i\trelative interaction strength U/2J, default value = 1\n"
 		<< std::endl;
 	std::exit(EXIT_FAILURE);
 }

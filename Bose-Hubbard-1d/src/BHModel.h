@@ -2,7 +2,8 @@
 #include "pch.h"
 
 
-using basisVecType = arma::Col<uint8_t>;
+using basisVecType = arma::Row<uint8_t>;
+using basisMatType = arma::Mat<uint8_t>;
 namespace fs = std::filesystem;
 
 class BHModel {
@@ -35,9 +36,9 @@ public:
 	void getNBasis();
 	
 
-	const char* h5name() {
+	std::string h5name() {
 		std::string str = "nS=" + std::to_string(nSites) + "_nP=" + std::to_string(nParticles) + "_basis.h5";
-		return str.c_str();
+		return str;
 	}
 
 	void mkBasisMatrix() {
