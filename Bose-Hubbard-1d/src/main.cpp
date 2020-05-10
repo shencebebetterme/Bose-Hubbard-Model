@@ -77,12 +77,9 @@ void getHamiltonian() {
 	Hamiltonian H;
 
 	auto start = high_resolution_clock::now();
-	H.getH0();
-	H.getH1();
 	H.mkHamiltonianMatrix();
 	auto stop = high_resolution_clock::now();
 	auto duration = duration_cast<milliseconds>(stop - start);
 	std::cout << duration.count() / 1000.0 << " seconds has elapsed in generating Hamiltonian matrix\n\n" << std::endl;
-
 	hamil_bin_file_name = H.bin_name();
 }

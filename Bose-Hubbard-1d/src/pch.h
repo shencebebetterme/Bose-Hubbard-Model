@@ -9,5 +9,11 @@
 #include <chrono>
 #include <vector>
 #include <cstdint>
+#include <algorithm>
+#include <execution>
+#include <cmath>
+#include <utility>
+#include <numeric>
+#include <iterator>
 
 #include "armadillo"

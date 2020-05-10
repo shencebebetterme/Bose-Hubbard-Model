@@ -17,6 +17,13 @@ public:
 	
 	void getH0();
 	void getH1();
+	void hopping(int);
+
+	void getH() {
+		this->getH0();
+		this->getH1();
+		H.print("Hamiltonian matrix");
+	}
 
 	//set hamiltonian matrix name
 	std::string bin_name();
@@ -27,9 +34,10 @@ public:
 			return;
 		}
 		else {
-			createHamiltonianMatrix();
+			this->getH();
+			saveHamiltonianMatrix();
 		}
 	}
 
-	void createHamiltonianMatrix();
+	void saveHamiltonianMatrix();
 };
