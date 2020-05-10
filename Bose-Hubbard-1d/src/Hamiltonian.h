@@ -19,7 +19,11 @@ public:
 	
 	void getH0();
 	void getH1();
-	void hopping(int);
+	void hopping(const int&);
+
+	void hopping2(int& iv) {
+		iv++;
+	}
 
 	void getH() {
 		this->getH0();

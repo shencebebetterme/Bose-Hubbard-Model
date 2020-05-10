@@ -140,27 +140,29 @@ void Hamiltonian::getH1() {
 	for (auto i = T.begin(); i < T.end(); i++) {
 		*i = calculateHash(basisMat, i - T.begin());
 	}
-	//initialize vector ind
+	//initialize vector by sequence 0, 1, 2, ...
 	std::iota(ind.begin(), ind.end(), 0);
-	//create and release the local variable Tcopy
-	{
-		std::vector<float> Tcopy(T);
-		//sort T
-		std::sort(exe_policy, T.begin(), T.end());
-		//sort ind
-		auto comparator = [&Tcopy](int i1, int i2) {return Tcopy[i1] < Tcopy[i2]; };
-		std::sort(exe_policy, ind.begin(), ind.end(), comparator);
-	}
-	//TODO: parallelize this process
+
+	std::vector<int> indc(ind);//create the local copy
+	std::vector<float> Tcopy(T);//create the local variable Tcopy
+	//sort T
+	std::sort(exe_policy, T.begin(), T.end());
+	//sort ind
+	auto comparator = [&Tcopy](int i1, int i2) {return Tcopy[i1] < Tcopy[i2]; };
+	std::sort(exe_policy, ind.begin(), ind.end(), comparator);
+	
+	
 	//find the hopping-connected basis vectors
-	for (int iv = 0; iv < dim; iv++) {
-		hopping(iv);
-	}
+	//for (int iv = 0; iv < dim; iv++) {
+	//	hopping(iv);
+	//}
+	//parallelize this process
+	for_each(exe_policy, indc.begin(), indc.end(), [&](int& n) {hopping(n); });
 
 }
 
 
-void Hamiltonian::hopping(int iv) {
+void Hamiltonian::hopping(const int& iv) {
 	basisVecType bvi = extractRow(basisMat, iv);
 	for (int j = 0; j < bvi.n_elem; j++) {
 		//if neighboring hopping j+1 -> j exist
