@@ -10,6 +10,8 @@ public:
 	arma::sp_mat H;
 	//arma::sp_mat H1;//the off diagonal part
 	basisMatType basisMat;
+	std::vector<float> T;
+	std::vector<int> ind;
 
 	//constructor
 	Hamiltonian();

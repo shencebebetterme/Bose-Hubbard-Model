@@ -19,7 +19,8 @@ Hamiltonian::Hamiltonian() {
 	dim = basisMat.n_rows;
 	numBasis = dim;
 	H = arma::sp_mat(dim, dim);
-	//H1(d, d);
+	T = std::vector<float>(dim, 0.0);
+	ind = std::vector<int>(dim, 0);//record the index of T elements
 }
 
 void Hamiltonian::loadBasisMat() {
@@ -135,52 +136,53 @@ float hashAfterHop(const basisVecType& bv, int i, int j) {
 
 
 void Hamiltonian::getH1() {
-	std::vector<float> T(dim);
-	std::vector<int> ind(dim);//record the index of T elements
 	//populate vector T
 	for (auto i = T.begin(); i < T.end(); i++) {
 		*i = calculateHash(basisMat, i - T.begin());
 	}
 	//initialize vector ind
 	std::iota(ind.begin(), ind.end(), 0);
-	//sort T
-	std::sort(exe_policy, T.begin(), T.end());
-	//sort ind
-	auto comparator = [&T](int i1, int i2) {return T[i1] < T[i2]; };
-	std::sort(exe_policy, ind.begin(), ind.end(), comparator);
-
+	//create and release the local variable Tcopy
+	{
+		std::vector<float> Tcopy(T);
+		//sort T
+		std::sort(exe_policy, T.begin(), T.end());
+		//sort ind
+		auto comparator = [&Tcopy](int i1, int i2) {return Tcopy[i1] < Tcopy[i2]; };
+		std::sort(exe_policy, ind.begin(), ind.end(), comparator);
+	}
 	//TODO: parallelize this process
 	//find the hopping-connected basis vectors
 	for (int iv = 0; iv < dim; iv++) {
-		basisVecType bvi = extractRow(basisMat, iv);
-		for (int j = 0; j < bvi.n_elem; j++) {
-			//if neighboring hopping j+1 -> j exist
-			if (existHopping(bvi, j, j + 1)) {
-				float hj = hashAfterHop(bvi, j, j + 1);
-				//search the hash of the basis vector after hopping
-				auto p = binary_find(T.begin(), T.end(), hj);
-				//location in sorted vector sort(T)
-				int loc_v = p - T.begin();
-				//location in original vector T
-				int loc_v_ori = ind[loc_v];
-
-				//populate H1 in coordinate (iv, loc_v_ori) and (loc_v_ori, iv)
-				//becuase H1 is symmetric
-				if (j == bvi.n_elem - 1) {
-					H(iv, loc_v_ori) = - std::sqrt((bvi(j) + 1) * bvi(0));
-					H(loc_v_ori, iv) = -std::sqrt((bvi(j) + 1) * bvi(0));
-				}
-				else {
-					H(iv, loc_v_ori) = - std::sqrt((bvi(j) + 1) * bvi(j + 1));
-					H(loc_v_ori, iv) = -std::sqrt((bvi(j) + 1) * bvi(j + 1));
-				}
-			}
-		}
+		hopping(iv);
 	}
 
 }
 
 
-void Hamiltonian::hopping(int i) {
+void Hamiltonian::hopping(int iv) {
+	basisVecType bvi = extractRow(basisMat, iv);
+	for (int j = 0; j < bvi.n_elem; j++) {
+		//if neighboring hopping j+1 -> j exist
+		if (existHopping(bvi, j, j + 1)) {
+			float hj = hashAfterHop(bvi, j, j + 1);
+			//search the hash of the basis vector after hopping
+			auto p = binary_find(T.begin(), T.end(), hj);
+			//location in sorted vector sort(T)
+			int loc_v = p - T.begin();
+			//location in original vector T
+			int loc_v_ori = ind[loc_v];
 
+			//populate H1 in coordinate (iv, loc_v_ori) and (loc_v_ori, iv)
+			//becuase H1 is symmetric
+			if (j == bvi.n_elem - 1) {
+				H(iv, loc_v_ori) = -std::sqrt((bvi(j) + 1) * bvi(0));
+				H(loc_v_ori, iv) = -std::sqrt((bvi(j) + 1) * bvi(0));
+			}
+			else {
+				H(iv, loc_v_ori) = -std::sqrt((bvi(j) + 1) * bvi(j + 1));
+				H(loc_v_ori, iv) = -std::sqrt((bvi(j) + 1) * bvi(j + 1));
+			}
+		}
+	}
 }
