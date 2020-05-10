@@ -15,10 +15,9 @@ namespace fs = std::filesystem;
 //communicate with arg parser
 int numSites = 1;
 int numParticles = 1;
-int numBasis = 1;
 double intStrength = 1.0; //the interaction strength U/2 (with J set to 1)
 int numEig = 1;
-double tol = 0.001;
+double tol = 0.0001;
 
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -35,7 +34,7 @@ int main(int argc, char* argv[]) {
 	std::cout << "number of Particles = " << numParticles << "\n";
 	std::cout << "interaction strength U/2J = " << intStrength << "\n\n";
 
-#if 1
+
 	//getModel(numSites, numParticles);
 
 	//getHamiltonian(numSites, numParticles, intStrength);
@@ -43,16 +42,11 @@ int main(int argc, char* argv[]) {
 	Hamiltonian ham(numSites, numParticles, 1.0);
 	ham.getHamiltonianMatrix();
 	std::cout << "\ncalculating eigenvalues...\n";
-	arma::vec eigval = arma::eigs_sym(ham.H, numEig, "sa", tol);
+	arma::vec eigval;
+	arma::mat eigvec;
+	arma::eigs_sym(eigval, eigvec, ham.H, numEig, "sa", tol);
 	eigval.print("\nthe smallest eigenvalues are");
-
-
-#else
-	arma::mat A = arma::randu(5, 5);
-	arma::mat B = arma::randu(5, 5);
-	arma::umat C = (A >= B);
-	C.print();
-#endif
+	//eigvec.print("\nthe corresponding eigenvectors are");
 }
 
 

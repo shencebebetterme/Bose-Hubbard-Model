@@ -8,12 +8,12 @@
 #include <filesystem>
 #include <chrono>
 #include <vector>
-#include <cstdint>
-#include <algorithm>
-#include <execution>
+#include <cstdint> //uint8_t
+#include <algorithm> // sor_each, sort
+#include <execution> // parallel STL
 #include <cmath>
 #include <utility>
-#include <numeric>
+#include <numeric> // iota
 #include <iterator>
 
 #include "armadillo"

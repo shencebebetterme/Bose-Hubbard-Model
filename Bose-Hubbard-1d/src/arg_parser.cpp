@@ -52,7 +52,7 @@ void inline showHelp() {
 		<< "-nS\tnumber of Sites, default value = 1\n"
 		<< "-nP\tnumber of Particles, default value = 1\n"
 		<< "-i\trelative interaction strength U/2J, default value = 1\n"
-		<< "-t\ttolerance in eig_sym decomposition, default value = 0.001\n"
+		<< "-t\ttolerance in eig_sym decomposition, default value = 0.0001\n"
 		<< "-nE\tnumber of eigenvalues calculated in eig_sum, default value = 1\n"
 		<< std::endl;
 	std::exit(EXIT_FAILURE);
