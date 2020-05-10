@@ -36,14 +36,14 @@ public:
 	void getNBasis();
 	
 
-	std::string h5name() {
-		std::string str = "nS=" + std::to_string(nSites) + "_nP=" + std::to_string(nParticles) + "_basis.h5";
+	static std::string h5name(int ns, int np) {
+		std::string str = "nS=" + std::to_string(ns) + "_nP=" + std::to_string(np) + "_basis.h5";
 		return str;
 	}
 
 	void mkBasisMatrix() {
-		if (fs::exists(h5name())) { 
-			std::cout << "h5 file already exists! Exiting.\n"; return; 
+		if (fs::exists(h5name(nSites, nParticles))) { 
+			std::cout << h5name(nSites, nParticles) << " already exists!.\n"; return;
 		}
 		else {
 			getNBasis();

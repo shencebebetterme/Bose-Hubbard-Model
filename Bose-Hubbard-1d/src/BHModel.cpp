@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "BHModel.h"
 
-extern const char* dataset_name;
+//extern const char* dataset_name;
 
 void BHModel::printBasis() {
 	currentVec = firstVec;
@@ -68,7 +68,7 @@ void BHModel::createBasisMatrix() {
 		}
 	}
 	//basisMat.print("basisMat is");
-	basisMat.save(arma::hdf5_name(h5name(), dataset_name));
+	basisMat.save(arma::hdf5_name(h5name(nSites, nParticles), "dataset"));
 	std::cout << "\nbasis matrix has dimension " << nBasis << " * " << nSites << "\n";
-	std::cout << "basis matrix is successfully created and saved to " << h5name() << "\n\n";
+	std::cout << "basis matrix is successfully created and saved to " << h5name(nSites, nParticles) << "\n\n";
 }

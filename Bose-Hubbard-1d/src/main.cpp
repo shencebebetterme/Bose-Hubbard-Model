@@ -12,14 +12,12 @@ link with the hdf5 library:
 using namespace std::chrono;
 namespace fs = std::filesystem;
 
+//communicate with arg parser
 int numSites = 1;
 int numParticles = 1;
 int numBasis = 1;
 double intStrength = 1.0; //the interaction strength U/2 (with J set to 1)
 
-std::string basis_h5_file_name;
-std::string hamil_bin_file_name;
-const char* dataset_name = "dataset";
 
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -28,7 +26,7 @@ const char* dataset_name = "dataset";
 
 void argParser(int argc, char* argv[]);
 void getModel(int ns, int np);
-void getHamiltonian();
+void getHamiltonian(int, int, double);
 
 
 int main(int argc, char* argv[]) {
@@ -38,19 +36,16 @@ int main(int argc, char* argv[]) {
 	std::cout << "interaction strength U/2J = " << intStrength << "\n\n";
 
 #if 1
-	getModel(numSites, numParticles);
+	//getModel(numSites, numParticles);
 
-	//TODO: write the Hamiltonian matrix
-	getHamiltonian();
-	
+	//getHamiltonian(numSites, numParticles, intStrength);
 
-	//arma::Mat<int> data;
-	//data.load(arma::hdf5_name(h5_file_name, "Dataset1"));
-	////because h5 is column based, we need to take the transpose
-	//data = data.t();//now data is a nBasis*basisLen matrix
-	//std::cout << "\nnumber of basis vectors = " << data.n_rows << "\n";
-	//std::cout << "each vector has dim = " << data.n_cols << "\n\n";
-	//data.print("basis matrix is:");
+	Hamiltonian ham(numSites, numParticles, 1.0);
+	ham.getH();
+	arma::vec eigval = arma::eigs_sym(ham.H, 15, "sm", 0.1);
+	eigval.print("the smallest eigenvalues are");
+
+
 #else
 	arma::mat A = arma::randu(5, 5);
 	arma::mat B = arma::randu(5, 5);
@@ -62,24 +57,21 @@ int main(int argc, char* argv[]) {
 
 //log the created h5 filename, update numBasis
 void getModel(int ns, int np) {
-	BHModel bh(numSites, numParticles);
+	BHModel bh(ns, np);
 
 	auto start = high_resolution_clock::now();
 	bh.mkBasisMatrix();
 	auto stop = high_resolution_clock::now();
 	auto duration = duration_cast<milliseconds>(stop - start);
 	std::cout << duration.count() / 1000.0 << " seconds has elapsed in generating basis matrix\n\n" << std::endl;
-
-	basis_h5_file_name = bh.h5name();
 }
 
-void getHamiltonian() {
-	Hamiltonian H;
+void getHamiltonian(int ns, int np, double intstr) {
+	Hamiltonian Hamil(ns, np, intstr);
 
 	auto start = high_resolution_clock::now();
-	H.mkHamiltonianMatrix();
+	Hamil.mkHamiltonianMatrix();
 	auto stop = high_resolution_clock::now();
 	auto duration = duration_cast<milliseconds>(stop - start);
 	std::cout << duration.count() / 1000.0 << " seconds has elapsed in generating Hamiltonian matrix\n\n" << std::endl;
-	hamil_bin_file_name = H.bin_name();
 }

@@ -3,36 +3,37 @@
 #include "BHModel.h"
 
 
-extern int numSites;
-extern int numParticles;
-extern int numBasis;
-extern double intStrength; //the interaction strength U/2 (with J set to 1)
-extern std::string basis_h5_file_name;
-extern std::string hamil_bin_file_name;
-extern const char* dataset_name;
 
 //auto exe_policy = std::execution::par_unseq;
 auto exe_policy = std::execution::par;
 
 
 
-Hamiltonian::Hamiltonian() {
+Hamiltonian::Hamiltonian(int ns, int np, double intstr) {
+	nSites = ns;
+	nParticles = np;
+	intStr = intstr;
 	this->loadBasisMat();
 	dim = basisMat.n_rows;
-	numBasis = dim;
+	nBasis = dim;
 	H = arma::sp_mat(dim, dim);
 	T = std::vector<float>(dim, 0.0);
 	ind = std::vector<int>(dim, 0);//record the index of T elements
 }
 
 void Hamiltonian::loadBasisMat() {
-	if (fs::exists(basis_h5_file_name)) {
-		basisMat.load(arma::hdf5_name(basis_h5_file_name, dataset_name));
-		std::cout << basis_h5_file_name << " ==> " << dataset_name << "\thas been loaded!\n\n";
+	std::string h5_name = BHModel::h5name(nSites, nParticles);
+	if (fs::exists(h5_name)) {
+		basisMat.load(arma::hdf5_name(h5_name, "dataset"));
+		std::cout << h5_name << "\thas been loaded!\n\n";
 	}
 	else {
-		std::cout << basis_h5_file_name << " doesn't exist!\n Exiting.\n\n";
-		std::exit(EXIT_FAILURE);
+		std::cout << h5_name << " doesn't exist!\t try creating " << h5_name << "\n\n";
+		BHModel bh(nSites, nParticles);
+		bh.mkBasisMatrix();
+		basisMat.load(arma::hdf5_name(h5_name, "dataset"));
+		std::cout << h5_name << "\thas been loaded!\n\n";
+		//std::exit(EXIT_FAILURE);
 	}
 }
 
@@ -40,16 +41,16 @@ void Hamiltonian::loadBasisMat() {
 
 //set hamiltonian matrix name
 //sparse matrix can't be saved to h5 format
-std::string Hamiltonian::bin_name() {
-	std::string str = "nS=" + std::to_string(numSites) + "_nP=" + std::to_string(numParticles) + "_hamiltonian.bin";
+std::string Hamiltonian::bin_name(int ns, int np, double intstr) {
+	std::string str = "nS=" + std::to_string(ns) + "_nP=" + std::to_string(np) + "_intstr=" + std::to_string(intstr) + "_hamiltonian.bin";
 	return str;
 }
 
 void Hamiltonian::saveHamiltonianMatrix() {
-	H.save(bin_name(), arma::arma_binary);//use the default dataset name = "dataset"
+	H.save(bin_name(nSites, nParticles, intStr), arma::arma_binary);//use the default dataset name = "dataset"
 	//H.save(arma::hdf5_name(hamil_h5_file_name, dataset_name));
 	std::cout << "\nHamiltonian matrix has dimension " << dim << " * " << dim << "\n";
-	std::cout << "Hamiltonian matrix is successfully created and saved to " << bin_name() << "\n\n";
+	std::cout << "Hamiltonian matrix is successfully created and saved to " << bin_name(nSites, nParticles, intStr) << "\n\n";
 }
 
 
@@ -57,26 +58,26 @@ void Hamiltonian::getH0() {
 	for (int i = 0; i < dim; i++) {
 		//take the i-th row of basisMat
 		int iM = 0;
-		for (int j = 0; j < numSites; j++) {
+		for (int j = 0; j < nSites; j++) {
 			iM += basisMat(i, j) * (basisMat(i, j) - 1);
 		}
-		H(i, i) = iM * intStrength;
+		H(i, i) = iM * intStr;
 	}
 }
 
 
 
 //extract the i-th row from the basis vector
-basisVecType extractRow(const basisMatType& bm, const int i) {
-	basisVecType bv(numSites);
-	for (int j = 0; j < numSites; j++) {
+basisVecType Hamiltonian::extractRow(const basisMatType& bm, const int i) {
+	basisVecType bv(nSites);
+	for (int j = 0; j < nSites; j++) {
 		bv[j] = bm(i, j);
 	}
 	return bv;
 }
 
 //calculate hash of a row vector
-float calculateHash(const basisVecType& bv) {
+float Hamiltonian::calculateHash(const basisVecType& bv) {
 	float s = 0;
 	for (auto pr = bv.begin(); pr < bv.end(); pr++) {
 		s += std::sqrtf(3 + 100 * (pr - bv.begin())) * (*pr);
@@ -86,7 +87,7 @@ float calculateHash(const basisVecType& bv) {
 
 #if 1
 //calculate the hash of the i-th row of matrix bm
-float calculateHash(const basisMatType& bm, int i) {
+float Hamiltonian::calculateHash(const basisMatType& bm, int i) {
 	basisVecType bv = extractRow(bm, i);
 	return calculateHash(bv);
 }
@@ -116,10 +117,10 @@ ForwardIt binary_find(ForwardIt first, ForwardIt last, const Ty& value, Compare 
 }
 
 //determine whether the hopping j->i exist
-inline bool existHopping(const basisVecType& bv, int i, int j) {
+inline bool Hamiltonian::existHopping(const basisVecType& bv, int i, int j) {
 	//periodic boundary
-	if (i >= numSites) { i = i % numSites; }
-	if (j >= numSites) { j = j % numSites; }
+	if (i >= nSites) { i = i % nSites; }
+	if (j >= nSites) { j = j % nSites; }
 	//can't hop if there's no particle on site j
 	if (bv(j) == 0) return false;
 	else return true;
@@ -127,11 +128,11 @@ inline bool existHopping(const basisVecType& bv, int i, int j) {
 
 
 //hash value after hopping of j->i
-float hashAfterHop(const basisVecType& bv, int i, int j) {
+float Hamiltonian::hashAfterHop(const basisVecType& bv, int i, int j) {
 	basisVecType bw = bv;
 	//periodic boundary
-	if (i >= numSites) { i = i % numSites; }
-	if (j >= numSites) { j = j % numSites; }
+	if (i >= nSites) { i = i % nSites; }
+	if (j >= nSites) { j = j % nSites; }
 	bw(i) += 1;
 	bw(j) -= 1;
 	return calculateHash(bw);
