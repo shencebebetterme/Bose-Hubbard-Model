@@ -11,7 +11,9 @@ extern std::string basis_h5_file_name;
 extern std::string hamil_bin_file_name;
 extern const char* dataset_name;
 
+//auto exe_policy = std::execution::par_unseq;
 auto exe_policy = std::execution::par;
+
 
 
 Hamiltonian::Hamiltonian() {
@@ -113,15 +115,16 @@ ForwardIt binary_find(ForwardIt first, ForwardIt last, const Ty& value, Compare 
 	return first != last && !comp(value, *first) ? first : last;
 }
 
-//determine whether the hopping i->i+1 exist
+//determine whether the hopping j->i exist
 inline bool existHopping(const basisVecType& bv, int i, int j) {
 	//periodic boundary
 	if (i >= numSites) { i = i % numSites; }
 	if (j >= numSites) { j = j % numSites; }
-	//can't hop if there's no particle at site j
+	//can't hop if there's no particle on site j
 	if (bv(j) == 0) return false;
 	else return true;
 }
+
 
 //hash value after hopping of j->i
 float hashAfterHop(const basisVecType& bv, int i, int j) {
@@ -136,7 +139,7 @@ float hashAfterHop(const basisVecType& bv, int i, int j) {
 
 
 void Hamiltonian::getH1() {
-	//populate vector T
+	//store the hash values in T
 	for (auto i = T.begin(); i < T.end(); i++) {
 		*i = calculateHash(basisMat, i - T.begin());
 	}
@@ -153,38 +156,33 @@ void Hamiltonian::getH1() {
 	
 	
 	//find the hopping-connected basis vectors
-	//for (int iv = 0; iv < dim; iv++) {
-	//	hopping(iv);
-	//}
-	//parallelize this process
-	for_each(exe_policy, indc.begin(), indc.end(), [&](int& n) {hopping(n); });
+	for (int iv = 0; iv < dim; iv++) {
+		basisVecType bvi = extractRow(basisMat, iv);
+		for (int j = 0; j < bvi.n_elem; j++) {
+			//if neighboring hopping j+1 -> j exist
+			if (existHopping(bvi, j, j + 1)) {
+				float hj = hashAfterHop(bvi, j, j + 1);
+				//search the hash of the basis vector after hopping
+				auto p = binary_find(T.begin(), T.end(), hj);
+				//location in sorted vector sort(T)
+				int loc_v = p - T.begin();
+				//location in original vector T
+				int loc_v_ori = ind[loc_v];
 
-}
-
-
-void Hamiltonian::hopping(const int& iv) {
-	basisVecType bvi = extractRow(basisMat, iv);
-	for (int j = 0; j < bvi.n_elem; j++) {
-		//if neighboring hopping j+1 -> j exist
-		if (existHopping(bvi, j, j + 1)) {
-			float hj = hashAfterHop(bvi, j, j + 1);
-			//search the hash of the basis vector after hopping
-			auto p = binary_find(T.begin(), T.end(), hj);
-			//location in sorted vector sort(T)
-			int loc_v = p - T.begin();
-			//location in original vector T
-			int loc_v_ori = ind[loc_v];
-
-			//populate H1 in coordinate (iv, loc_v_ori) and (loc_v_ori, iv)
-			//becuase H1 is symmetric
-			if (j == bvi.n_elem - 1) {
-				H(iv, loc_v_ori) = -std::sqrt((bvi(j) + 1) * bvi(0));
-				H(loc_v_ori, iv) = -std::sqrt((bvi(j) + 1) * bvi(0));
-			}
-			else {
-				H(iv, loc_v_ori) = -std::sqrt((bvi(j) + 1) * bvi(j + 1));
-				H(loc_v_ori, iv) = -std::sqrt((bvi(j) + 1) * bvi(j + 1));
+				//populate H1 in coordinate (iv, loc_v_ori) and (loc_v_ori, iv)
+				//becuase H1 is symmetric
+				if (j == bvi.n_elem - 1) {
+					H(iv, loc_v_ori) = -std::sqrt((bvi(j) + 1) * bvi(0));
+					H(loc_v_ori, iv) = -std::sqrt((bvi(j) + 1) * bvi(0));
+				}
+				else {
+					H(iv, loc_v_ori) = -std::sqrt((bvi(j) + 1) * bvi(j + 1));
+					H(loc_v_ori, iv) = -std::sqrt((bvi(j) + 1) * bvi(j + 1));
+				}
 			}
 		}
 	}
+	//parallelize this process
+	//for_each(exe_policy, indc.begin(), indc.end(), [&](int& n) {hopping(n); });
+
 }

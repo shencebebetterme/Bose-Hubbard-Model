@@ -19,16 +19,10 @@ public:
 	
 	void getH0();
 	void getH1();
-	void hopping(const int&);
-
-	void hopping2(int& iv) {
-		iv++;
-	}
 
 	void getH() {
 		this->getH0();
 		this->getH1();
-		H.print("Hamiltonian matrix");
 	}
 
 	//set hamiltonian matrix name
