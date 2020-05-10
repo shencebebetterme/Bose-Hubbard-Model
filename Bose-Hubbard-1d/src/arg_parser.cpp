@@ -3,12 +3,16 @@
 extern int numSites;
 extern int numParticles;
 extern double intStrength; //the interaction strength U/2 (with J set to 1)
+extern int numEig;
+extern double tol;
 
 static enum argStr
 {
 	num_Sites,
 	num_Particles,
-	inter_Strength
+	inter_Strength,
+	num_eig,
+	tolerance
 };
 
 using mapType = std::map<std::string, argStr>;
@@ -38,6 +42,8 @@ void initMap(mapType& map) {
 	map["-nS"] = num_Sites;
 	map["-nP"] = num_Particles;
 	map["-i"] = inter_Strength;
+	map["-nE"] = num_eig;
+	map["-t"] = tolerance;
 }
 
 // show help message
@@ -46,6 +52,8 @@ void inline showHelp() {
 		<< "-nS\tnumber of Sites, default value = 1\n"
 		<< "-nP\tnumber of Particles, default value = 1\n"
 		<< "-i\trelative interaction strength U/2J, default value = 1\n"
+		<< "-t\ttolerance in eig_sym decomposition, default value = 0.001\n"
+		<< "-nE\tnumber of eigenvalues calculated in eig_sum, default value = 1\n"
 		<< std::endl;
 	std::exit(EXIT_FAILURE);
 }
@@ -64,6 +72,8 @@ void inline parseAllArgs(mapType& map, int argc, char* argv[]) {
 		case num_Sites: numSites = std::stoi(arg_iv); break;
 		case num_Particles: numParticles = std::stoi(arg_iv); break;
 		case inter_Strength: intStrength = std::stod(arg_iv); break;
+		case num_eig: numEig = std::stoi(arg_iv); break;
+		case tolerance: tol = std::stod(arg_iv); break;
 		}
 	}
 }

@@ -25,7 +25,7 @@ void Hamiltonian::loadBasisMat() {
 	std::string h5_name = BHModel::h5name(nSites, nParticles);
 	if (fs::exists(h5_name)) {
 		basisMat.load(arma::hdf5_name(h5_name, "dataset"));
-		std::cout << h5_name << "\thas been loaded!\n\n";
+		std::cout << h5_name << "\thas been loaded from disk\n\n";
 	}
 	else {
 		std::cout << h5_name << " doesn't exist!\t try creating " << h5_name << "\n\n";
@@ -49,7 +49,6 @@ std::string Hamiltonian::bin_name(int ns, int np, double intstr) {
 void Hamiltonian::saveHamiltonianMatrix() {
 	H.save(bin_name(nSites, nParticles, intStr), arma::arma_binary);//use the default dataset name = "dataset"
 	//H.save(arma::hdf5_name(hamil_h5_file_name, dataset_name));
-	std::cout << "\nHamiltonian matrix has dimension " << dim << " * " << dim << "\n";
 	std::cout << "Hamiltonian matrix is successfully created and saved to " << bin_name(nSites, nParticles, intStr) << "\n\n";
 }
 

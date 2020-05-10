@@ -17,7 +17,8 @@ int numSites = 1;
 int numParticles = 1;
 int numBasis = 1;
 double intStrength = 1.0; //the interaction strength U/2 (with J set to 1)
-
+int numEig = 1;
+double tol = 0.001;
 
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -26,7 +27,6 @@ double intStrength = 1.0; //the interaction strength U/2 (with J set to 1)
 
 void argParser(int argc, char* argv[]);
 void getModel(int ns, int np);
-void getHamiltonian(int, int, double);
 
 
 int main(int argc, char* argv[]) {
@@ -41,9 +41,10 @@ int main(int argc, char* argv[]) {
 	//getHamiltonian(numSites, numParticles, intStrength);
 
 	Hamiltonian ham(numSites, numParticles, 1.0);
-	ham.getH();
-	arma::vec eigval = arma::eigs_sym(ham.H, 15, "sm", 0.1);
-	eigval.print("the smallest eigenvalues are");
+	ham.getHamiltonianMatrix();
+	std::cout << "\ncalculating eigenvalues...\n";
+	arma::vec eigval = arma::eigs_sym(ham.H, numEig, "sa", tol);
+	eigval.print("\nthe smallest eigenvalues are");
 
 
 #else
@@ -64,14 +65,4 @@ void getModel(int ns, int np) {
 	auto stop = high_resolution_clock::now();
 	auto duration = duration_cast<milliseconds>(stop - start);
 	std::cout << duration.count() / 1000.0 << " seconds has elapsed in generating basis matrix\n\n" << std::endl;
-}
-
-void getHamiltonian(int ns, int np, double intstr) {
-	Hamiltonian Hamil(ns, np, intstr);
-
-	auto start = high_resolution_clock::now();
-	Hamil.mkHamiltonianMatrix();
-	auto stop = high_resolution_clock::now();
-	auto duration = duration_cast<milliseconds>(stop - start);
-	std::cout << duration.count() / 1000.0 << " seconds has elapsed in generating Hamiltonian matrix\n\n" << std::endl;
 }
