@@ -41,24 +41,7 @@ public:
 
 	//if .bin file exists, load it from disk
 	//otherwise create the Hamiltonian matrix and save it to disk
-	void getHamiltonianMatrix(bool save = false) {
-		std::string ham_name = bin_name(nSites, nParticles, intStr);
-		if (fs::exists(ham_name)) {
-			std::cout << ham_name << " loaded from disk\n";
-			H.load(ham_name, arma::arma_binary);
-			dim = H.n_rows;
-			return;
-		}
-		else {
-			std::cout << "\ncalculating Hamiltonian matrix...\n";
-			this->calculateH();
-			if (save) saveHamiltonianMatrix();
-		}
-
-		float density = 100.0 * H.n_nonzero / H.n_elem;
-		std::cout << "Hamiltonian matrix has dimension " << dim << " * " << dim << "\n"
-				  << "Hamiltonian matrix has density " << density << "%\n\n";
-	}
+	void getHamiltonianMatrix(bool save = false);
 
 	void saveHamiltonianMatrix();
 };
