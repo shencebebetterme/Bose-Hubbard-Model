@@ -25,7 +25,6 @@ double tol = 0.0001;
 
 
 void argParser(int argc, char* argv[]);
-void getModel(int ns, int np);
 
 
 int main(int argc, char* argv[]) {
@@ -41,6 +40,7 @@ int main(int argc, char* argv[]) {
 
 	Hamiltonian ham(numSites, numParticles, 1.0);
 	ham.getHamiltonianMatrix();
+	//ham.H.print();
 	std::cout << "\ncalculating eigenvalues...\n";
 	arma::vec eigval;
 	arma::mat eigvec;
@@ -49,14 +49,3 @@ int main(int argc, char* argv[]) {
 	//eigvec.print("\nthe corresponding eigenvectors are");
 }
 
-
-//log the created h5 filename, update numBasis
-void getModel(int ns, int np) {
-	BHModel bh(ns, np);
-
-	auto start = high_resolution_clock::now();
-	bh.mkBasisMatrix();
-	auto stop = high_resolution_clock::now();
-	auto duration = duration_cast<milliseconds>(stop - start);
-	std::cout << duration.count() / 1000.0 << " seconds has elapsed in generating basis matrix\n\n" << std::endl;
-}

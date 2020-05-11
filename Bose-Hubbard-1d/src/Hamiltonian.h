@@ -27,10 +27,6 @@ public:
 	void calculateH() {
 		this->getH0();
 		this->getH1();
-		float density = 100.0 * H.n_nonzero / H.n_elem;
-		std::cout << "\nHamiltonian matrix calculated!\n";
-		std::cout << "Hamiltonian matrix has dimension " << dim << " * " << dim << "\n"
-			<< "Hamiltonian matrix has density " << density << "%\n\n";
 	}
 
 
@@ -45,23 +41,23 @@ public:
 
 	//if .bin file exists, load it from disk
 	//otherwise create the Hamiltonian matrix and save it to disk
-	void getHamiltonianMatrix() {
+	void getHamiltonianMatrix(bool save = false) {
 		std::string ham_name = bin_name(nSites, nParticles, intStr);
 		if (fs::exists(ham_name)) {
-			//std::cout << ham_name << " file already exists!\n";
+			std::cout << ham_name << " loaded from disk\n";
 			H.load(ham_name, arma::arma_binary);
 			dim = H.n_rows;
-			float density = 100.0 * H.n_nonzero / H.n_elem;
-			std::cout << ham_name << "\thas been loaded from disk\n"
-				<< "Hamiltonian matrix has dimension " << dim << " * " << dim << "\n"
-				<< "Hamiltonian matrix has density " << density << "%\n\n";
 			return;
 		}
 		else {
 			std::cout << "\ncalculating Hamiltonian matrix...\n";
 			this->calculateH();
-			saveHamiltonianMatrix();
+			if (save) saveHamiltonianMatrix();
 		}
+
+		float density = 100.0 * H.n_nonzero / H.n_elem;
+		std::cout << "Hamiltonian matrix has dimension " << dim << " * " << dim << "\n"
+				  << "Hamiltonian matrix has density " << density << "%\n\n";
 	}
 
 	void saveHamiltonianMatrix();
