@@ -28,11 +28,12 @@ void Hamiltonian::loadBasisMat() {
 		std::cout << h5_name << "\thas been loaded from disk\n\n";
 	}
 	else {
-		std::cout << h5_name << " doesn't exist!\t try creating " << h5_name << "\n\n";
+		//std::cout << h5_name << " doesn't exist!\t try creating " << h5_name << "\n\n";
 		BHModel bh(nSites, nParticles);
 		bh.mkBasisMatrix();
-		basisMat.load(arma::hdf5_name(h5_name, "dataset"));
-		std::cout << h5_name << "\thas been loaded!\n\n";
+		//basisMat.load(arma::hdf5_name(h5_name, "dataset"));
+		basisMat = bh.basisMat;
+		//std::cout << h5_name << "\thas been loaded!\n\n";
 		//std::exit(EXIT_FAILURE);
 	}
 }
@@ -70,7 +71,6 @@ void Hamiltonian::getHamiltonianMatrix(bool save) {
 	std::cout << "Hamiltonian matrix has dimension " << dim << " * " << dim << "\n"
 		<< "Hamiltonian matrix has density " << density << "%\n\n";
 }
-
 
 
 void Hamiltonian::getH0() {

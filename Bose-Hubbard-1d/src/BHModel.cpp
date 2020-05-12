@@ -61,14 +61,16 @@ void BHModel::getNBasis() {
 }
 
 void BHModel::createBasisMatrix() {
-	basisMatType basisMat(nBasis, nSites);
+	basisMat = basisMatType(nBasis, nSites);
 	for (int i = 0; i < nBasis; i++) {
 		for (int j = 0; j < nSites; j++) {
 			basisMat(i, j) = matVec[i](j);
 		}
 	}
 	//basisMat.print("basisMat is");
+#if 0
 	basisMat.save(arma::hdf5_name(h5name(nSites, nParticles), "dataset"));
 	std::cout << "\nbasis matrix has dimension " << nBasis << " * " << nSites << "\n";
 	std::cout << "basis matrix is successfully created and saved to " << h5name(nSites, nParticles) << "\n\n";
+#endif
 }

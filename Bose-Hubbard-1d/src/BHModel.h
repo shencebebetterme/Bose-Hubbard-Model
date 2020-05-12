@@ -15,6 +15,7 @@ public:
 	basisVecType firstVec;
 	basisVecType lastVec;
 	basisVecType currentVec;
+	basisMatType basisMat;
 	std::vector<basisVecType> matVec = {};
 
 	//constructor of BHModel class
